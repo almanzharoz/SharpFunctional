@@ -55,3 +55,20 @@ Action MVC-контроллера: Удаление элемента из БД, 
 		.SwitchNotNull(_dal.GetProductCategoryByUrl, PartialView)
 		.SwitchNotNull(_dal.GetProducer, PartialView)
 		.SwitchDefault(NotFound);
+
+	[Route("{a}/{b}/{c}/{d}/delete")]
+	[Route("{a}/{b}/{c}/delete")]
+	[Route("{a}/{b}/delete")]
+	[Route("{a}/delete")]
+	[HttpPost]
+	public IActionResult Delete(string a, string b, string c, string d, string url, bool noredirect=false) =>
+		_dal.GetUrl(a, b, c, d)
+		.SwitchNotNull(_dal.GetPage, x => noredirect.If(x, url, _dal.Delete, _dal.Delete))
+		.SwitchNotNull(_dal.GetCategoryByUrl, x => noredirect.If(x, url, _dal.Delete, _dal.Delete))
+		.SwitchNotNull(_dal.GetProduct, x => noredirect.If(x, url, _dal.Delete, _dal.Delete))
+		.SwitchNotNull(_dal.GetActionByUrl, x => noredirect.If(x, url, _dal.Delete, _dal.Delete))
+		.SwitchNotNull(_dal.GetNewsByUrl, x => noredirect.If(x, url, _dal.Delete, _dal.Delete))
+		.SwitchNotNull(_dal.GetProductCategoryByUrl, x => noredirect.If(x, url, _dal.Delete, _dal.Delete))
+		.SwitchNotNull(_dal.GetProducer, x => noredirect.If(x, url, _dal.Delete, _dal.Delete))
+		.SwitchDefault(x => false)
+		.If<IActionResult>(() =>IsAjax.If(()=> Content("Удалено"), ()=> (IActionResult)RedirectPermanent($"{Request.Headers["Referer"]}")), ()=> Content("Удалить не получилось"));
