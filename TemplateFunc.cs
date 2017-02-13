@@ -174,6 +174,13 @@ namespace SharpFuncExt
 				return func(arg, u);
 		}
 
+		public static T Using<T, TUsing>(this T arg, Func<T, TUsing> init, Action<T, TUsing> func) where TUsing : IDisposable
+		{
+			using (var u = init(arg))
+				func(arg, u);
+			return arg;
+		}
+
 		public static TResult Using<T, TResult>(this T arg, Func<T, TResult> func) where T : IDisposable
 		{
 			using (arg)
@@ -198,12 +205,28 @@ namespace SharpFuncExt
 				return new SwitchResult<TResult, T>(arg, func(arg));
 			return new SwitchResult<TResult, T>(arg);
 		}
+		public static SwitchResult<T> Switch<T>(this T arg, T checkValue, Action<T> func)
+		{
+			if (arg.IsNull() && checkValue.IsNull() || arg.NotNull() && arg.Equals(checkValue))
+				return new SwitchResult<T>(arg.Fluent(func), true);
+			return new SwitchResult<T>(arg);
+		}
 
 		public static SwitchResult<TResult, T> Switch<T, TResult>(this T arg, Func<T, bool> check, Func<T, TResult> func)
 		{
 			if (check(arg))
 				return new SwitchResult<TResult, T>(arg, func(arg));
 			return new SwitchResult<TResult, T>(arg);
+		}
+
+		public static SwitchResult<T> Switch<T>(this T arg, Func<T, bool> check, Action<T> func)
+		{
+			if (check(arg))
+			{
+				func(arg);
+				return new SwitchResult<T>(arg, true);
+			}
+			return new SwitchResult<T>(arg);
 		}
 
 		public static SwitchResult<TResult, T> Switch<T, TResult>(this SwitchResult<TResult, T> arg, T checkValue, Func<T, TResult> func)
@@ -217,6 +240,13 @@ namespace SharpFuncExt
 		{
 			if (!arg.HasValue && check(arg.Arg))
 				return arg.SetValue(func(arg.Arg));
+			return arg;
+		}
+
+		public static SwitchResult<T> Switch<T>(this SwitchResult<T> arg, Func<T, bool> check, Action<T> func)
+		{
+			if (!arg.HasValue && check(arg.Arg))
+				return arg.Done(func);
 			return arg;
 		}
 
@@ -291,5 +321,29 @@ namespace SharpFuncExt
 		}
 
 		public T SwitchDefault(Func<TArg, T> func) => !this.HasValue ? func(this.Arg) : this.Value;
+	}
+
+	public class SwitchResult<TArg>
+	{
+		public TArg Arg { get; }
+		public bool HasValue { get; private set; }
+
+		public SwitchResult(TArg arg, bool done = false)
+		{
+			Arg = arg;
+			HasValue = done;
+		}
+
+		public void SwitchDefault(Action<TArg> func)
+		{
+			if(!this.HasValue) func(this.Arg);
+		}
+
+		public SwitchResult<TArg> Done(Action<TArg> func)
+		{
+			func(Arg);
+			HasValue = true;
+			return this;
+		}
 	}
 }
