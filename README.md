@@ -27,16 +27,6 @@
 				.ThrowIf(x => !x.IsValid, x => new Exception($"Error in Count<{typeof (T)}>: {x.ServerError?.Error}, {x.DebugInformation}"))
 				.Convert(x => (int) x.Count);
 
-Асинхронная версия:
-
-		public Task<int> CountAsync<T>(IQueryBuilder<T, ElasticEntityKey> query) where T : class, IEntity<ElasticEntityKey>
-			=> _client.CountAsync<T>(x => x.Type(_mapping.GetMappingType<T>().Discriminator)
-				.If(q => query != null, q => q.Query(y => ((ElasticQueryBuilder<T>) query).GetQueryContainer()), q=>null))
-				.ThrowIf(x => !x.IsValid, x => new Exception($"Error in Count<{typeof (T)}>: {x.ServerError?.Error}, {x.DebugInformation}"))
-				.Convert(x => (int) x.Count);
-				
-Можно увидеть абсолютную схожесть кода в синхронной и асинхронной версиях. Это очень удобная особенность написания асинхронных функций, мы не используем в коде async/await.
-
 # Еще пример
 Action MVC-контроллера: Удаление элемента из БД, 1 функция для всех типов объектов
 
