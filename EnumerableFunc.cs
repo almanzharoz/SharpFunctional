@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,6 +39,32 @@ namespace SharpFuncExt
 			else
 				return (list ?? new TValue[0]).Union(new[] { value });
 			return list;
+		}
+
+		public static T Add<T, TValue>(this T list, TValue value) where T : ICollection<TValue>
+		{
+			list.Add(value);
+			return list;
+		}
+		public static T TryAdd<T, TValue>(this T list, TValue value) where T : IProducerConsumerCollection<TValue>
+		{
+			list.TryAdd(value);
+			return list;
+		}
+		public static TValue TryAdd<T, TValue>(this TValue value, T list) where T : IProducerConsumerCollection<TValue>
+		{
+			list.TryAdd(value);
+			return value;
+		}
+		public static T Add<T, TValue, TKey>(this T list, TKey key, TValue value) where T : IDictionary<TKey, TValue>
+		{
+			list.Add(key, value);
+			return list;
+		}
+		public static TValue Add<T, TValue, TKey>(this TValue value, T list, TKey key) where T : IDictionary<TKey, TValue>
+		{
+			list.Add(key, value);
+			return value;
 		}
 
 		public static TValue Remove<TValue>(this TValue value, ref TValue[] list)
@@ -80,14 +107,16 @@ namespace SharpFuncExt
 
 		public static IEnumerable<T> Each<T, TResult>(this IEnumerable<T> arg, Func<T, TResult> func)
 		{
-			foreach (var v in arg)
-				func(v);
+			if (arg != null)
+				foreach (var v in arg)
+					func(v);
 			return arg;
 		}
 		public static IEnumerable<T> Each<T>(this IEnumerable<T> arg, Action<T> func)
 		{
-			foreach (var v in arg)
-				func(v);
+			if (arg != null)
+				foreach (var v in arg)
+					func(v);
 			return arg;
 		}
 

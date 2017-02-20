@@ -67,6 +67,12 @@ namespace SharpFuncExt
 			return arg;
 		}
 
+		public static bool IfTrue(this bool arg, Action ifTrue)
+		{
+			if (arg)
+				ifTrue();
+			return arg;
+		}
 		public static TResult If<TResult>(this bool arg, Func<TResult> ifTrue, Func<TResult> ifFalse)
 			=> arg ? ifTrue() : ifFalse();
 		public static TResult If<TResult>(this bool arg, TResult ifTrue, TResult ifFalse)

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace SharpFuncExt
 {
-    public static class NullFunc
-    {
+	public static class NullFunc
+	{
 		public static TResult IfNull<T, TResult>(this T arg, Func<TResult> ifNull, Func<T, TResult> ifNotNull)
 		{
 			if (arg.IsNull())
@@ -21,6 +21,12 @@ namespace SharpFuncExt
 			if (arg.NotNull())
 				return ifNotNull(arg);
 			return ifNull();
+		}
+		public static TResult IfNotNull<T, TResult>(this T arg, Func<T, TResult> ifNotNull, TResult ifNull)
+		{
+			if (arg.NotNull())
+				return ifNotNull(arg);
+			return ifNull;
 		}
 
 		public static TResult IfNull<T, TResult>(this IEnumerable<T> arg, Func<TResult> ifNull, Func<IEnumerable<T>, TResult> ifNotNull)
@@ -70,6 +76,13 @@ namespace SharpFuncExt
 			if (arg.NotNull())
 				func(arg);
 			return arg;
+		}
+
+		public static TResult IfNotNullOrDefault<T, TResult>(this T arg, Func<T, TResult> func)
+		{
+			if (arg.NotNull())
+				return func(arg);
+			return default(TResult);
 		}
 
 		public static T HasNotNullArg<T>(this T arg, string argName) => arg.ThrowIfNull(() => new ArgumentNullException(argName));
